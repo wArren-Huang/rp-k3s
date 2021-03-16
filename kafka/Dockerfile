@@ -26,8 +26,10 @@ FROM warrenhuang/corretto:ubuntu2004-jdk11.0.10
 ARG KAFKA_DIR=/opt/kafka
 ARG KAFKA_USER=kafka
 ARG KAFKA_GROUP=kafka
-ENV KAFKA_LOGDIR=/log \
-    KAFKA_CONFIGDIR=/conf
+ENV KAFKA_LOGDIR="/log" \
+    KAFKA_CONFIGDIR="/conf" \
+    KAFKA_LOG_RETENTION_MS="-1" \
+    KAFKA_LOG_RETENTION_BYTES="-1"
 COPY --from=downloader /kafka_*-bin ${KAFKA_DIR}
 COPY *.sh "${KAFKA_DIR}/bin/"
 RUN set -eux; \
