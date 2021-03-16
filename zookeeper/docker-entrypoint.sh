@@ -47,22 +47,7 @@ function generate_config_file_from_env() {
     if [[ $host_name =~ (.*)-([0-9]+)$ ]]; then
       hostname_prefix=${BASH_REMATCH[1]}
       ordinal=${BASH_REMATCH[2]}
-      if [[ ! -f $zk_id_file ]]; then        
-        id=$(($ordinal+1))
-        echo $id > $zk_id_file
-        echo ""
-        echo "Generated $zk_id_file file"
-        echo "=================================================="
-        cat $zk_id_file
-        echo "=================================================="
-        echo ""
-      else
-        echo ""
-        echo "$zk_id_file already exist as below"
-        echo "=================================================="
-        cat $zk_id_file
-        echo "=================================================="
-      fi
+      id=$(($ordinal+1))
       if [[ ! -z $domain_name ]]; then
         domain_name=".$domain_name"
       fi
@@ -74,6 +59,29 @@ function generate_config_file_from_env() {
         echo "Environment variable ZK_SERVERS does not contain valid server list and failed to extract ordinal from hostname $host_name"
         exit 1
     fi
+  else
+    if [[ -z "$ZK_ID" ]]; then
+      echo "ZK_ID is a mandatory environment variable when ZK_SERVERS provided"
+      exit 1
+    else
+      id=$ZK_ID
+    fi
+  fi
+  
+  if [[ ! -f $zk_id_file ]]; then        
+    echo $id > $zk_id_file
+    echo ""
+    echo "Generated $zk_id_file file"
+    echo "=================================================="
+    cat $zk_id_file
+    echo "=================================================="
+    echo ""
+  else
+    echo ""
+    echo "$zk_id_file already exist as below"
+    echo "=================================================="
+    cat $zk_id_file
+    echo "=================================================="
   fi
 
   rm -f $zk_config_file

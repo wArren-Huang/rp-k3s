@@ -38,16 +38,16 @@ COPY *.sh "${ZK_DIR}/bin/"
 RUN set -eux; \
     groupadd -r ${ZK_GROUP} --gid=1000; \
     useradd -r -g ${ZK_GROUP} --uid=1000 ${ZK_USER}; \
-    mkdir -p "$ZK_DATA_LOG_DIR" "$ZK_DATA_DIR" "$ZK_CONF_DIR" "$ZK_LOG_DIR"; \
-    chown ${ZK_USER}:${ZK_GROUP} "$ZK_DATA_LOG_DIR" "$ZK_DATA_DIR" "$ZK_CONF_DIR" "$ZK_LOG_DIR"; \
-    mv "${ZK_DIR}/conf/"* "$ZK_CONF_DIR";
+    mkdir -p "${ZK_DATA_LOG_DIR}" "${ZK_DATA_DIR}" "${ZK_CONF_DIR}" "${ZK_LOG_DIR}"; \
+    chown ${ZK_USER}:${ZK_GROUP} "${ZK_DATA_LOG_DIR}" "${ZK_DATA_DIR}" "${ZK_CONF_DIR}" "${ZK_LOG_DIR}"; \
+    mv "${ZK_DIR}/conf/"* "${ZK_CONF_DIR}";
 WORKDIR ${ZK_DIR}
-USER zookeeper
-VOLUME ["$ZK_DATA_DIR", "$ZK_DATA_LOG_DIR", "$ZK_LOG_DIR"]
+USER ${ZK_USER}
+VOLUME ["${ZK_DATA_DIR}", "${ZK_DATA_LOG_DIR}", "${ZK_LOG_DIR}"]
 EXPOSE 2181 2888 3888
 ENV PATH=${ZK_DIR}/bin:$PATH \
-    ZOOCFGDIR=$ZK_CONF_DIR \
-    ZOO_LOG_DIR=$ZK_LOG_DIR
+    ZOOCFGDIR=${ZK_CONF_DIR} \
+    ZOO_LOG_DIR=${ZK_LOG_DIR}
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["zkServer.sh", "start-foreground"]
-HEALTHCHECK --interval=5s --timeout=5s --start-period=5s --retries=3 CMD [ "healthcheck.sh" ]
+HEALTHCHECK --interval=15s --timeout=5s --start-period=5s --retries=3 CMD [ "healthcheck.sh" ]

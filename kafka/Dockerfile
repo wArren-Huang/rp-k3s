@@ -26,22 +26,20 @@ FROM warrenhuang/corretto:ubuntu2004-jdk11.0.10
 ARG KAFKA_DIR=/opt/kafka
 ARG KAFKA_USER=kafka
 ARG KAFKA_GROUP=kafka
-ENV KAFKA_LOGDIR=/log
+ENV KAFKA_LOGDIR=/log \
+    KAFKA_CONFIGDIR=/conf
 COPY --from=downloader /kafka_*-bin ${KAFKA_DIR}
-# COPY *.sh "${KAFKA_DIR}/bin/"
-# RUN set -eux; \
-#     groupadd -r ${KAFKA_GROUP} --gid=1000; \
-#     useradd -r -g ${KAFKA_GROUP} --uid=1000 ${KAFKA_USER}; \
-#     mkdir -p "$ZK_DATA_LOG_DIR" "$ZK_DATA_DIR" "$ZK_CONF_DIR" "$ZK_LOG_DIR"; \
-#     chown ${KAFKA_USER}:${KAFKA_GROUP} "$ZK_DATA_LOG_DIR" "$ZK_DATA_DIR" "$ZK_CONF_DIR" "$ZK_LOG_DIR"; \
-#     mv "${ZK_DIR}/conf/"* "$ZK_CONF_DIR";
-# WORKDIR ${ZK_DIR}
-# USER zookeeper
-# VOLUME ["$ZK_DATA_DIR", "$ZK_DATA_LOG_DIR", "$ZK_LOG_DIR"]
-# EXPOSE 2181 2888 3888
-# ENV PATH=${ZK_DIR}/bin:$PATH \
-#     ZOOCFGDIR=$ZK_CONF_DIR \
-#     ZOO_LOG_DIR=$ZK_LOG_DIR
-# ENTRYPOINT ["docker-entrypoint.sh"]
-# CMD ["zkServer.sh", "start-foreground"]
-# HEALTHCHECK --interval=5s --timeout=5s --start-period=5s --retries=3 CMD [ "healthcheck.sh" ]
+COPY *.sh "${KAFKA_DIR}/bin/"
+RUN set -eux; \
+    groupadd -r ${KAFKA_GROUP} --gid=1000; \
+    useradd -r -g ${KAFKA_GROUP} --uid=1000 ${KAFKA_USER}; \
+    mkdir -p "${KAFKA_LOGDIR}" "${KAFKA_CONFIGDIR}"; \
+    chown ${KAFKA_USER}:${KAFKA_GROUP} "${KAFKA_LOGDIR}" "${KAFKA_CONFIGDIR}";
+WORKDIR ${KAFKA_DIR}
+USER ${KAFKA_USER}
+VOLUME ["${KAFKA_LOGDIR}"]
+EXPOSE 9092
+ENV PATH=${KAFKA_DIR}/bin:$PATH
+ENTRYPOINT ["docker-entrypoint.sh"]
+CMD ["kafka-server-start.sh", "${KAFKA_CONFIGDIR}/server.properties"]
+HEALTHCHECK --interval=15s --timeout=5s --start-period=5s --retries=3 CMD [ "healthcheck.sh" ]
